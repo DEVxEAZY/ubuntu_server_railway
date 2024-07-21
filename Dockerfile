@@ -1,19 +1,23 @@
 FROM ubuntu:latest
 
-# Atualiza a lista de pacotes e instala o wget
+# Instala dependências incluindo systemd, nginx e php-fpm
 RUN apt-get update && \
     apt-get upgrade -y && \
-    apt-get -y install wget
+    apt-get install -y wget systemd systemd-sysv nginx php-fpm && \
+    apt-get clean
 
 # Baixa e instala o ttyd
 RUN wget -qO /bin/ttyd https://github.com/tsl0922/ttyd/releases/download/1.7.3/ttyd.x86_64 && \
     chmod +x /bin/ttyd
 
-# Define a porta a ser exposta
-EXPOSE $PORT
+# Copia a configuração personalizada do Nginx
+COPY default /etc/nginx/sites-available/default
 
-# Armazena as credenciais em um arquivo de depuração
-RUN echo $CREDENTIAL > /tmp/debug
+# Habilita os serviços no systemd
+RUN systemctl enable nginx && systemctl enable php7.4-fpm
 
-# Define o comando de inicialização
-CMD ["/bin/bash", "-c", "/bin/ttyd -p $PORT -c $USERNAME:$PASSWORD /bin/bash"]
+# Expor a porta 80
+EXPOSE 80
+
+# Configura ponto de entrada para usar systemd
+CMD ["/lib/systemd/systemd"]
