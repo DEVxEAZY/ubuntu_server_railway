@@ -1,0 +1,11 @@
+time
+openpyxl
+pandas
+pyautogui
+requests
+beautifulsoup4
+selenium
+emoji
+keyboard
+tk
+threading
